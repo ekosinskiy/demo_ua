@@ -24,7 +24,6 @@ export default class Dashboard extends Component {
             inApp: '',
             accountName: '',
             email: '',
-            deviceId: props.deviceId,
             deepLink: ''
         };
         this.activateEmail = this.activateEmail.bind(this);
@@ -32,11 +31,6 @@ export default class Dashboard extends Component {
     }
 
     componentWillMount() {
-
-        UrbanAirship.getChannelId().then((channelId) => {
-            this.setState({channelId: channelId});
-        });
-
         UrbanAirship.addListener("deepLink", (event) => {
             this.setState({deepLink: event.deepLink});
         });
@@ -52,7 +46,7 @@ export default class Dashboard extends Component {
     }
 
     activateEmail() {
-        let deviceId = this.state.deviceId;
+        let deviceId = this.props.deviceId;
         let requestBody = {
             channels: {
                 urbanairship: {
@@ -63,7 +57,7 @@ export default class Dashboard extends Component {
         requestBody['channels']['urbanairship']['address'][deviceId] = {
             os: DeviceInfo.getSystemName(),
             v: DeviceInfo.getSystemVersion(),
-            token: this.state.channelId
+            token: this.props.channelId
         };
         fetch('http://ekosinskiy.api.dev.cordial.io/v1/contacts/' + this.state.email, {
             method: 'PUT',

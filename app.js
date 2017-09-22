@@ -57,6 +57,7 @@ export default class app extends Component {
                         <Tab heading="Main">
                             <Dashboard
                                 deviceId={deviceId}
+                                channelId={this.state.channelId}
                             />
                         </Tab>
                         <Tab heading="Info">
