@@ -50,7 +50,8 @@ export default class Dashboard extends Component {
         let requestBody = {
             channels: {
                 urbanairship: {
-                    address: {}
+                    address: {},
+                    subscribeStatus:"subscribed"
                 }
             }
         };
