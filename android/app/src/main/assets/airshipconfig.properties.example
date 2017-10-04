@@ -1,0 +1,12 @@
+developmentAppKey = APP_KEY
+developmentAppSecret = APP_SECRET
+
+productionAppKey = APP_KEY
+productionAppSecret = APP_SECRET
+
+# FCM/GCM Sender ID
+gcmSender = SENDER_ID
+
+# Notification customization
+notificationIcon = ic_notification
+notificationAccentColor = #ff0000

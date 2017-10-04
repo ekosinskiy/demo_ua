@@ -16,6 +16,19 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 More information you can find here 
 https://facebook.github.io/react-native/docs/getting-started.html
 
+### Set configs
+Rename file
+```
+android/app/src/main/assets/airshipconfig.properties.example to
+android/app/src/main/assets/airshipconfig.properties
+```
+and
+
+```ios/AirshipConfig.plist.example to ios/AirshipConfig.plist```
+ 
+Add app key, app secret and gsm sender (for android) in configuration files:
+android/app/src/main/assets/airshipconfig.properties
+ios/AirshipConfig.plist
 
 ### Run application
 
