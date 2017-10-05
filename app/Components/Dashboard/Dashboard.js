@@ -11,10 +11,37 @@ import {
     Text, Form, Item, Input
 } from 'native-base';
 
-import {StyleSheet} from 'react-native';
+import {StyleSheet, TouchableHighlight} from 'react-native';
 import BlockResult from '../BlockResult/BlockResult';
 import DeviceInfo from 'react-native-device-info';
 
+
+const styles = StyleSheet.create({
+    inApp: {
+
+    },
+    modal: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+
+    },
+    modalContent:{
+        margin: 'auto',
+        width: '100%',
+        height: 100
+    },
+    block: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden'
+    }
+});
 
 export default class Dashboard extends Component {
 
@@ -28,20 +55,34 @@ export default class Dashboard extends Component {
         };
         this.activateEmail = this.activateEmail.bind(this);
         this.resetState = this.resetState.bind(this);
+        this.renderInAppContent = this.renderInAppContent.bind(this);
+    }
+
+    renderInAppContent(inAppObject) {
+        let displayLabels = ['alert', 'type', 'position'];
+        let inApp = JSON.parse(inAppObject);
+        console.log(JSON.parse(inAppObject));
+        return (
+            <View>
+            {[...displayLabels].map((item) => {
+                console.log(inApp.display[item]);
+                return (<Text>{item}:{inApp.display[item]}</Text>);
+            })}
+            </View>
+        )
     }
 
     componentWillMount() {
         UrbanAirship.addListener("deepLink", (event) => {
+            console.log('Deep link:', event.deepLink);
             this.setState({deepLink: event.deepLink});
         });
 
         UrbanAirship.addListener("pushReceived", (notification) => {
             this.setState({inApp: ''});
             if (notification.extras['com.urbanairship.in_app']) {
-                this.setState({inApp: notification.extras['com.urbanairship.in_app']});
-                console.log("In-APP:", JSON.parse(notification.extras['com.urbanairship.in_app']));
+                this.setState({inApp: this.renderInAppContent(notification.extras['com.urbanairship.in_app'])});
             }
-            console.log('Received push: ', notification);
         });
     }
 
@@ -81,7 +122,7 @@ export default class Dashboard extends Component {
     }
 
     render() {
-        console.log(this.state);
+
         let inApp, deepLink;
         if(this.state.inApp!='') {
             inApp = <BlockResult header="In-App info" value={this.state.inApp}/>
@@ -94,6 +135,11 @@ export default class Dashboard extends Component {
         return (
             <Content padder>
                 <Form>
+                    <Content style={styles.modal}>
+                        <Text style={styles.modalContent}></Text>
+                        <Notification style={styles.modalContent} ref={(ref) => { this.notification = ref; }} />
+                    </Content>
+
                     <Item stackedLabel>
                         <Label>Account name</Label>
                         <Input

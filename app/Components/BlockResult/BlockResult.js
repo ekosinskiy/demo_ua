@@ -9,9 +9,7 @@ export default class BlockResult extends Component {
         return (
             <Item stackedLabel>
                 <Label>{this.props.header}</Label>
-                <Text>
-                    {this.props.value}
-                </Text>
+                {this.props.value}
             </Item>
         );
     }
