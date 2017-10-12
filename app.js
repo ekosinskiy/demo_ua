@@ -33,6 +33,7 @@ export default class app extends Component {
 
     componentWillMount() {
         UrbanAirship.getChannelId().then((channelId) => {
+            console.log('Get channel ID:',channelId);
             this.setState({channelId: channelId});
         });
 
@@ -53,7 +54,7 @@ export default class app extends Component {
         return (
             <Container>
                 <Content>
-                    <Tabs initialPage={0}>
+                    <Tabs initialPage={1}>
                         <Tab heading="Main">
                             <Dashboard
                                 deviceId={deviceId}
