@@ -21,8 +21,10 @@ export default class Dashboard extends Component {
         super(props);
         this.state = {
             inApp: '',
+            activateResponse: '',
             accountName: '',
             email: '',
+            instanceName: '',
             deepLink: ''
         };
         this.activateEmail = this.activateEmail.bind(this);
@@ -80,7 +82,8 @@ export default class Dashboard extends Component {
             v: DeviceInfo.getSystemVersion(),
             token: this.props.channelId
         };
-        fetch('http://ekosinskiy.api.dev.cordial.io/v1/contacts/' + this.state.email, {
+        //console.log(this.state);
+        fetch('http://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -89,22 +92,28 @@ export default class Dashboard extends Component {
             },
             body: JSON.stringify(requestBody)
         }).then((response) => {
-            console.log(response);
+            this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
+            //console.log(response.status);
+            //console.log(JSON.parse(response._bodyInit));
         });
     }
 
     resetState() {
         this.setState({
             deepLink:'',
-            inApp:''
+            inApp:'',
+            activateResponse: ''
         });
     }
 
     render() {
 
-        let inApp, deepLink;
+        let inApp, deepLink, activateResponse;
         if(this.state.inApp!='') {
             inApp = <BlockResult header="In-App info" value={this.state.inApp}/>
+        }
+        if(this.state.activateResponse!='') {
+            activateResponse = <BlockResult header="Activate response" value={this.state.activateResponse}/>
         }
 
         if(this.state.deepLink!='') {
@@ -114,6 +123,12 @@ export default class Dashboard extends Component {
         return (
             <Content padder>
                 <Form>
+                    <Item stackedLabel>
+                        <Label>Instance name</Label>
+                        <Input
+                            onChangeText={(instanceName) => this.setState({instanceName})}
+                        />
+                    </Item>
                     <Item stackedLabel>
                         <Label>Account name</Label>
                         <Input
@@ -132,6 +147,7 @@ export default class Dashboard extends Component {
                     </Button>
                     {inApp}
                     {deepLink}
+                    {activateResponse}
                     <Button full danger style={{marginTop:10}} onPress={this.resetState}>
                         <Text>Reset result</Text>
                     </Button>

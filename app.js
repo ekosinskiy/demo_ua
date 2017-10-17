@@ -56,7 +56,7 @@ export default class app extends Component {
         return (
             <Container>
                 <Content>
-                    <Tabs initialPage={1}>
+                    <Tabs initialPage={0}>
                         <Tab heading="Main">
                             <Dashboard
                                 deviceId={deviceId}
