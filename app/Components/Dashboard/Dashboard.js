@@ -88,13 +88,15 @@ export default class Dashboard extends Component {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Cordial-Accountkey': this.state.accountName
+                'Cordial-Accountkey': this.state.accountName,
+                'Cordial-AccountKey': this.state.accountName,
+
             },
             body: JSON.stringify(requestBody)
         }).then((response) => {
             this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
-            //console.log(response.status);
-            //console.log(JSON.parse(response._bodyInit));
+            console.log(response.status);
+            console.log(response);
         });
     }
 
