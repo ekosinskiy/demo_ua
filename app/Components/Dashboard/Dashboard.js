@@ -95,7 +95,13 @@ export default class Dashboard extends Component {
             token: this.props.channelId
         };
         //console.log(this.state);
-        fetch('http://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email, {
+        console.log(requestBody);
+        console.log('http://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email);
+
+
+
+
+        fetch('https://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -109,6 +115,8 @@ export default class Dashboard extends Component {
             this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
             console.log(response.status);
             console.log(response);
+        }).catch((err) => {
+            console.log("ERROR",err);
         });
     }
 
