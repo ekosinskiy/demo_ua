@@ -54,8 +54,20 @@ export default class Dashboard extends Component {
     }
 
     componentWillMount() {
+
+        UrbanAirship.addListener("notificationResponse", (response) => {
+            console.log("DASHBOARD::::",response.notification);
+            if('fallback' in response.notification.extras) {
+                this.setState({fallback: response.notification.extras['fallback']});
+            }
+        });
+
         UrbanAirship.addListener("deepLink", (event) => {
-            console.log('Deep link:', event.deepLink);
+            // let actions = JSON.parse(event.extras['com.urbanairship.actions']);
+            // if(actions['^d_a']) {
+            //     console.log("Fallback URL:", actions['^d_a']);
+            // }
+
             this.setState({deepLink: this.wrapDeepLink(event.deepLink)});
         });
 
@@ -121,6 +133,7 @@ export default class Dashboard extends Component {
         if(this.state.deepLink!='') {
             deepLink=<BlockResult header="Deep link info" value={this.state.deepLink}/>
         }
+        console.log("STATE::::",this.state);
 
         return (
             <Content padder>
