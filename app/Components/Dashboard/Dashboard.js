@@ -25,7 +25,8 @@ export default class Dashboard extends Component {
             accountName: '',
             email: '',
             instanceName: '',
-            deepLink: ''
+            deepLink: '',
+            fallback:''
         };
         this.activateEmail = this.activateEmail.bind(this);
         this.resetState = this.resetState.bind(this);
@@ -56,18 +57,17 @@ export default class Dashboard extends Component {
     componentWillMount() {
 
         UrbanAirship.addListener("notificationResponse", (response) => {
-            console.log("DASHBOARD::::",response.notification);
-            if('fallback' in response.notification.extras) {
-                this.setState({fallback: response.notification.extras['fallback']});
+            if('com.urbanairship.actions' in response.notification.extras) {
+                let deepLinkData = JSON.parse(response.notification.extras['com.urbanairship.actions']);
+                if('^d_a' in deepLinkData) {
+                    console.log("RESP2::::",deepLinkData['^d_a']);
+                    this.setState({fallback:this.wrapDeepLink(deepLinkData['^d_a'])});
+                }
+
             }
         });
 
         UrbanAirship.addListener("deepLink", (event) => {
-            // let actions = JSON.parse(event.extras['com.urbanairship.actions']);
-            // if(actions['^d_a']) {
-            //     console.log("Fallback URL:", actions['^d_a']);
-            // }
-
             this.setState({deepLink: this.wrapDeepLink(event.deepLink)});
         });
 
@@ -95,7 +95,7 @@ export default class Dashboard extends Component {
             token: this.props.channelId
         };
         //console.log(this.state);
-        console.log(requestBody);
+       // console.log(requestBody);
         console.log('http://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email);
 
 
@@ -113,8 +113,8 @@ export default class Dashboard extends Component {
             body: JSON.stringify(requestBody)
         }).then((response) => {
             this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
-            console.log(response.status);
-            console.log(response);
+            //console.log(response.status);
+            //console.log(response);
         }).catch((err) => {
             console.log("ERROR",err);
         });
@@ -124,13 +124,14 @@ export default class Dashboard extends Component {
         this.setState({
             deepLink:'',
             inApp:'',
-            activateResponse: ''
+            activateResponse: '',
+            fallback:''
         });
     }
 
     render() {
 
-        let inApp, deepLink, activateResponse;
+        let inApp, deepLink, activateResponse, fallback;
         if(this.state.inApp!='') {
             inApp = <BlockResult header="In-App info" value={this.state.inApp}/>
         }
@@ -141,7 +142,10 @@ export default class Dashboard extends Component {
         if(this.state.deepLink!='') {
             deepLink=<BlockResult header="Deep link info" value={this.state.deepLink}/>
         }
-        console.log("STATE::::",this.state);
+        if(this.state.fallback!='') {
+            fallback=<BlockResult header="Fallback URL" value={this.state.fallback}/>
+        }
+        //console.log("STATE::::",this.state);
 
         return (
             <Content padder>
@@ -170,6 +174,7 @@ export default class Dashboard extends Component {
                     </Button>
                     {inApp}
                     {deepLink}
+                    {fallback}
                     {activateResponse}
                     <Button full danger style={{marginTop:10}} onPress={this.resetState}>
                         <Text>Reset result</Text>
