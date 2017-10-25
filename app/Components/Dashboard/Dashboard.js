@@ -57,6 +57,7 @@ export default class Dashboard extends Component {
     componentWillMount() {
 
         UrbanAirship.addListener("notificationResponse", (response) => {
+            this.setState({fallback: ''});
             if('com.urbanairship.actions' in response.notification.extras) {
                 let deepLinkData = JSON.parse(response.notification.extras['com.urbanairship.actions']);
                 if('^d_a' in deepLinkData) {
@@ -72,8 +73,9 @@ export default class Dashboard extends Component {
         });
 
         UrbanAirship.addListener("pushReceived", (notification) => {
+            console.log("NOTIFICATIONS:::",notification);
             this.setState({inApp: ''});
-            if (notification.extras['com.urbanairship.in_app']) {
+            if ('com.urbanairship.in_app' in notification.extras) {
                 this.setState({inApp: this.renderInAppContent(notification.extras['com.urbanairship.in_app'])});
             }
         });
