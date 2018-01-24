@@ -104,6 +104,9 @@ export default class Dashboard extends Component {
         if(this.state.instanceName.toLowerCase() === 'admin') {
             server = 'api.cordial.io/v1/contacts/';
         }
+        if(this.state.instanceName.toLowerCase() === 'api') {
+            server = 'api-staging.cordial.io/v1/contacts/';
+        }
         //this.setState({activateResponse:[this.wrapDeepLink('Server:'+server),this.wrapDeepLink('Server:'+server)]});
         //console.log(this.state);
        // console.log(requestBody);
@@ -169,7 +172,7 @@ export default class Dashboard extends Component {
                         />
                     </Item>
                     <Item stackedLabel>
-                        <Label>Account name 656</Label>
+                        <Label>Account name</Label>
                         <Input
                             onChangeText={(accountName) => this.setState({accountName})}
                         />
