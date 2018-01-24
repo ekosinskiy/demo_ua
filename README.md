@@ -36,6 +36,10 @@ ios/AirshipConfig.plist
 * ```react-native run-android``` or ```react-native run-ios```
 * for start logger ```react-native log-android``` or ```react-native log-ios```
 
+### Work with production environment
+
+Just set instance name - **admin**
+This value is case insensitive
 
 ### Before build IOS app
 

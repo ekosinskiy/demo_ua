@@ -100,14 +100,17 @@ export default class Dashboard extends Component {
             v: DeviceInfo.getSystemVersion(),
             token: this.props.channelId
         };
+        let server = this.state.instanceName+'.api.dev.cordial.io/v1/contacts/';
+        if(this.state.instanceName.toLowerCase() === 'admin') {
+            server = 'api.cordial.io/v1/contacts/';
+        }
+        //this.setState({activateResponse:[this.wrapDeepLink('Server:'+server),this.wrapDeepLink('Server:'+server)]});
         //console.log(this.state);
        // console.log(requestBody);
-        console.log('http://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email);
 
 
 
-
-        fetch('https://'+this.state.instanceName+'.api.dev.cordial.io/v1/contacts/' + this.state.email, {
+        fetch('https://'+server+ this.state.email, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -118,12 +121,15 @@ export default class Dashboard extends Component {
             },
             body: JSON.stringify(requestBody)
         }).then((response) => {
-            this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
+            this.setState({activateResponse:[this.wrapDeepLink('Status:'+response.status),this.wrapDeepLink('Server:'+server)]});
             //console.log(response.status);
             //console.log(response);
         }).catch((err) => {
             console.log("ERROR",err);
+            this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
         });
+
+
     }
 
     resetState() {
@@ -163,7 +169,7 @@ export default class Dashboard extends Component {
                         />
                     </Item>
                     <Item stackedLabel>
-                        <Label>Account name</Label>
+                        <Label>Account name 656</Label>
                         <Input
                             onChangeText={(accountName) => this.setState({accountName})}
                         />
