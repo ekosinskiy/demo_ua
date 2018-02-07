@@ -14,6 +14,7 @@ import {
 import BlockResult from '../BlockResult/BlockResult';
 import DeviceInfo from 'react-native-device-info';
 
+const SERVER_NAME = "10.10.201.132:8088";
 
 export default class Dashboard extends Component {
 
@@ -32,6 +33,8 @@ export default class Dashboard extends Component {
         this.resetState = this.resetState.bind(this);
         this.renderInAppContent = this.renderInAppContent.bind(this);
         this.wrapDeepLink = this.wrapDeepLink.bind(this);
+        this.makeAuth = this.makeAuth.bind(this);
+
     }
 
     renderInAppContent(inAppObject) {
@@ -85,6 +88,34 @@ export default class Dashboard extends Component {
         });
     }
 
+    makeAuth() {
+        let requestBody = {
+            email: this.state.email
+        };
+        console.log("makeAuth");
+        fetch('http://'+SERVER_NAME+"/proxy", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+
+            },
+            body: JSON.stringify(requestBody)
+        }).then((response) => {
+
+            let resp = JSON.parse(response._bodyText);
+            console.log(resp);
+            console.log("TOKEN:",resp.token);
+            if(resp.token) {
+                this.setState({authToken:resp.token});
+            }
+        }).catch((err) => {
+            console.log("ERROR",err);
+            this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
+        });
+
+    }
+
     activateEmail() {
         let deviceId = this.props.deviceId;
         let requestBody = {
@@ -100,39 +131,40 @@ export default class Dashboard extends Component {
             v: DeviceInfo.getSystemVersion(),
             token: this.props.channelId
         };
-        let server = this.state.instanceName+'.api.dev.cordial.io/v1/contacts/';
-        if(this.state.instanceName.toLowerCase() === 'admin') {
-            server = 'api.cordial.io/v1/contacts/';
-        }
-        if(this.state.instanceName.toLowerCase() === 'api') {
-            server = 'api-staging.cordial.io/v1/contacts/';
-        }
+        requestBody = {};
+        requestBody[deviceId] = {
+            os: DeviceInfo.getSystemName(),
+            v: DeviceInfo.getSystemVersion(),
+            token: this.props.channelId
+        };
+        // let server = this.state.instanceName+'.api.dev.cordial.io/v1/contacts/';
+        // if(this.state.instanceName.toLowerCase() === 'admin') {
+        //     server = 'api.cordial.io/v1/contacts/';
+        // }
+        // if(this.state.instanceName.toLowerCase() === 'api') {
+        //     server = 'api-staging.cordial.io/v1/contacts/';
+        // }
         //this.setState({activateResponse:[this.wrapDeepLink('Server:'+server),this.wrapDeepLink('Server:'+server)]});
         //console.log(this.state);
        // console.log(requestBody);
 
+        console.log(requestBody);
 
-
-        fetch('https://'+server+ this.state.email, {
+        fetch('http://'+SERVER_NAME+"/proxy/"+this.state.email+"/"+this.state.authToken, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Cordial-Accountkey': this.state.accountName,
-                'Cordial-AccountKey': this.state.accountName,
-
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(requestBody)
         }).then((response) => {
-            this.setState({activateResponse:[this.wrapDeepLink('Status:'+response.status),this.wrapDeepLink('Server:'+server)]});
+            this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
             //console.log(response.status);
-            //console.log(response);
+            console.log(response);
         }).catch((err) => {
             console.log("ERROR",err);
             this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
         });
-
-
     }
 
     resetState() {
@@ -161,11 +193,8 @@ export default class Dashboard extends Component {
             fallback=<BlockResult header="Fallback URL" value={this.state.fallback}/>
         }
         //console.log("STATE::::",this.state);
-
-        return (
-            <Content padder>
-                <Form>
-                    <Item stackedLabel>
+        /*
+        <Item stackedLabel>
                         <Label>Instance name</Label>
                         <Input
                             onChangeText={(instanceName) => this.setState({instanceName})}
@@ -177,6 +206,11 @@ export default class Dashboard extends Component {
                             onChangeText={(accountName) => this.setState({accountName})}
                         />
                     </Item>
+         */
+        return (
+            <Content padder>
+                <Form>
+
                     <Item stackedLabel>
                         <Label>Email</Label>
                         <Input
@@ -184,7 +218,10 @@ export default class Dashboard extends Component {
                             keyboardType="email-address"
                         />
                     </Item>
-                    <Button full onPress={this.activateEmail}>
+                    <Button full onPress={this.makeAuth}>
+                        <Text>Auth by proxy</Text>
+                    </Button>
+                    <Button full style={{marginTop:10}} onPress={this.activateEmail}>
                         <Text>Activate</Text>
                     </Button>
                     {inApp}
