@@ -8,7 +8,7 @@ import {
 import React, {Component} from 'react';
 import {AppRegistry} from 'react-native';
 import {
-    Container,
+    Container, Header,
     Content,
     Tabs, Tab
 } from 'native-base';
@@ -56,7 +56,7 @@ export default class app extends Component {
     render() {
         let deviceId = DeviceInfo.getUniqueID();
         return (
-            <Container>
+            <Container style={{ marginTop: 30}}>
                 <Content>
                     <Tabs initialPage={0}>
                         <Tab heading="Main">

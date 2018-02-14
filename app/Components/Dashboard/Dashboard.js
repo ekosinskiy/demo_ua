@@ -8,13 +8,11 @@ import {
 
 import {
     Button, Content, Label, View,
-    Text, Form, Item, Input
+    Text, Form, Item, Input, Picker
 } from 'native-base';
 
 import BlockResult from '../BlockResult/BlockResult';
 import DeviceInfo from 'react-native-device-info';
-
-const SERVER_NAME = "10.10.201.132:8088";
 
 export default class Dashboard extends Component {
 
@@ -24,16 +22,24 @@ export default class Dashboard extends Component {
             inApp: '',
             activateResponse: '',
             accountName: '',
+            accountList:[],
             email: '',
             instanceName: '',
             deepLink: '',
-            fallback:''
+            fallback:'',
+            serverName: '',
+            serverList:[],
+            accList:[]
+
+
         };
         this.activateEmail = this.activateEmail.bind(this);
         this.resetState = this.resetState.bind(this);
         this.renderInAppContent = this.renderInAppContent.bind(this);
         this.wrapDeepLink = this.wrapDeepLink.bind(this);
         this.makeAuth = this.makeAuth.bind(this);
+        this.getServerList = this.getServerList.bind(this);
+        this.getAccountList = this.getAccountList.bind(this);
 
     }
 
@@ -53,11 +59,51 @@ export default class Dashboard extends Component {
 
     wrapDeepLink(deepLink) {
         return (
-            <Text>{deepLink}</Text>
+            <Text key={Math.floor(Math.random() * 10000)}>{deepLink}</Text>
         );
     }
 
+    getServerList() {
+        fetch('http://cordialdev-trackjs-v2.s3.amazonaws.com/dev-test/uaappconfig.json', {
+            method: 'GET'
+        }).then((response) => {
+            let serverList = JSON.parse(response._bodyText);
+            console.log(serverList);
+            let serverObjects = [];
+            for(let i=0;i<serverList.length;i++) {
+                let x = serverList[i];
+                serverObjects.push(<Item label={x.name} value={x.server} key={x.name} />);
+                if(x.isDefault && x.isDefault===1) {
+                    this.setState({serverName:x.server});
+                }
+            }
+            this.setState({serverList: serverObjects});
+            this.getAccountList(this.state.serverName);
+        }).catch((err) => {
+            console.log("ERROR",err);
+            this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
+        });
+    }
+
+    getAccountList(servername) {
+        console.log("SERVER NAME:",servername);
+        console.log("GET ACCOUNT URL:",this.state.serverName+"accounts/list");
+        fetch(this.state.serverName+"accounts/list", {
+            method: 'GET'
+        }).then((response) => {
+            let accountList = JSON.parse(response._bodyText);
+            this.setState({accList: accountList});
+            this.setState({accountName:accountList[0].name});
+            this.setState({channelName:accountList[0].channel});
+            this.setState({accountList:accountList.map(x => <Item value={x.name} label={x.name} key={x.name}/>)});
+        }).catch((err) => {
+            console.log("ERROR",err);
+            this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
+        });
+    }
+
     componentWillMount() {
+        this.getServerList();
 
         UrbanAirship.addListener("notificationResponse", (response) => {
             this.setState({fallback: ''});
@@ -93,7 +139,7 @@ export default class Dashboard extends Component {
             email: this.state.email
         };
         console.log("makeAuth");
-        fetch('http://'+SERVER_NAME+"/proxy", {
+        fetch('http://'+this.state.serverName+"/"+this.state.accountName+"/proxy", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -109,6 +155,7 @@ export default class Dashboard extends Component {
             if(resp.token) {
                 this.setState({authToken:resp.token});
             }
+            this.setState({activateResponse:[this.wrapDeepLink('Status:'+response.status),this.wrapDeepLink('Token:'+resp.token)]});
         }).catch((err) => {
             console.log("ERROR",err);
             this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
@@ -137,20 +184,11 @@ export default class Dashboard extends Component {
             v: DeviceInfo.getSystemVersion(),
             token: this.props.channelId
         };
-        // let server = this.state.instanceName+'.api.dev.cordial.io/v1/contacts/';
-        // if(this.state.instanceName.toLowerCase() === 'admin') {
-        //     server = 'api.cordial.io/v1/contacts/';
-        // }
-        // if(this.state.instanceName.toLowerCase() === 'api') {
-        //     server = 'api-staging.cordial.io/v1/contacts/';
-        // }
-        //this.setState({activateResponse:[this.wrapDeepLink('Server:'+server),this.wrapDeepLink('Server:'+server)]});
-        //console.log(this.state);
-       // console.log(requestBody);
+
 
         console.log(requestBody);
 
-        fetch('http://'+SERVER_NAME+"/proxy/"+this.state.email+"/"+this.state.authToken, {
+        fetch('http://'+this.state.serverName+"/"+this.state.accountName+"/proxy/"+this.state.email+"/"+this.state.authToken, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -176,6 +214,28 @@ export default class Dashboard extends Component {
         });
     }
 
+    onServerChange(value) {
+        this.setState({
+            serverName: value
+        });
+        this.getAccountList(value);
+    }
+
+    onAccountChange(value) {
+        let accountList = this.state.accList;
+        console.log(accountList);
+        for(let i=0;i<accountList.length;i++) {
+            if(value === accountList[i].name) {
+                console.log("SELECT CHANNEL FOR:",value," :: ",accountList[i].channel);
+                this.setState({channelName:accountList[i].channel});
+            }
+        }
+        this.setState({
+            accountName: value
+        });
+    }
+
+
     render() {
 
         let inApp, deepLink, activateResponse, fallback;
@@ -192,24 +252,28 @@ export default class Dashboard extends Component {
         if(this.state.fallback!='') {
             fallback=<BlockResult header="Fallback URL" value={this.state.fallback}/>
         }
-        //console.log("STATE::::",this.state);
-        /*
-        <Item stackedLabel>
-                        <Label>Instance name</Label>
-                        <Input
-                            onChangeText={(instanceName) => this.setState({instanceName})}
-                        />
-                    </Item>
-                    <Item stackedLabel>
-                        <Label>Account name</Label>
-                        <Input
-                            onChangeText={(accountName) => this.setState({accountName})}
-                        />
-                    </Item>
-         */
+        let serverList = this.state.serverList;
+        let accountList = this.state.accountList;
         return (
             <Content padder>
                 <Form>
+                    <Picker
+                        iosHeader="Select proxy server"
+                        mode="dropdown"
+                        selectedValue={this.state.serverName}
+                        onValueChange={this.onServerChange.bind(this)}
+                    >
+                        {serverList}
+                    </Picker>
+                    <Picker
+                        iosHeader="Select account"
+                        mode="dropdown"
+                        selectedValue={this.state.accountName}
+                        onValueChange={this.onAccountChange.bind(this)}
+                    >
+                        {accountList}
+                    </Picker>
+
 
                     <Item stackedLabel>
                         <Label>Email</Label>
