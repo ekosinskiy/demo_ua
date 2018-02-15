@@ -138,8 +138,8 @@ export default class Dashboard extends Component {
         let requestBody = {
             email: this.state.email
         };
-        console.log("makeAuth");
-        fetch('http://'+this.state.serverName+"/"+this.state.accountName+"/proxy", {
+
+        fetch(this.state.serverName+this.state.accountName+"/proxy", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -148,6 +148,7 @@ export default class Dashboard extends Component {
             },
             body: JSON.stringify(requestBody)
         }).then((response) => {
+            console.log(response._bodyText);
 
             let resp = JSON.parse(response._bodyText);
             console.log(resp);
@@ -156,6 +157,7 @@ export default class Dashboard extends Component {
                 this.setState({authToken:resp.token});
             }
             this.setState({activateResponse:[this.wrapDeepLink('Status:'+response.status),this.wrapDeepLink('Token:'+resp.token)]});
+
         }).catch((err) => {
             console.log("ERROR",err);
             this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
@@ -188,7 +190,7 @@ export default class Dashboard extends Component {
 
         console.log(requestBody);
 
-        fetch('http://'+this.state.serverName+"/"+this.state.accountName+"/proxy/"+this.state.email+"/"+this.state.authToken, {
+        fetch(this.state.serverName+this.state.accountName+"/proxy/"+this.state.email+"/"+this.state.authToken, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
