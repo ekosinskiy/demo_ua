@@ -64,19 +64,19 @@ export default class Dashboard extends Component {
     }
 
     getServerList() {
-        let serverList = [
-            {
-                "name": "staging new",
-                "server": "https://demomobileappproxy-stg.cordial.io/",
-                "isDefault": 1
-            }
-
-        ];
+        // let serverList = [
+        //     {
+        //         "name": "staging new",
+        //         "server": "https://demomobileappproxy-stg.cordial.io/",
+        //         "isDefault": 1
+        //     }
+        //
+        // ];
         fetch('https://cordialdev-trackjs-v2.s3.amazonaws.com/dev-test/uaappconfig.json', {
             method: 'GET'
         }).then((response) => {
-            // let serverList = JSON.parse(response._bodyText);
-            // console.log(serverList);
+            let serverList = JSON.parse(response._bodyText);
+            console.log(serverList);
             let serverObjects = [];
             for(let i=0;i<serverList.length;i++) {
                 let x = serverList[i];
