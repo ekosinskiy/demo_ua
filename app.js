@@ -39,11 +39,11 @@ export default class app extends Component {
 
         UrbanAirship.addListener("notificationResponse", (response) => {
             //console.log(response.notification);
-            if('com.urbanairship.style' in response.notification.extras) {
-                let img = JSON.parse(response.notification.extras['com.urbanairship.style']);
-                this.setState({imageUrl: img.big_picture});
-                console.log('Notification response: ', img.big_picture);
-            }
+            // if('com.urbanairship.style' in response.notification.extras) {
+            //     let img = JSON.parse(response.notification.extras['com.urbanairship.style']);
+            //     this.setState({imageUrl: img.big_picture});
+            //     console.log('Notification response: ', img.big_picture);
+            // }
 
 
             console.log('Notification response isForeground: ', response.isForeground);

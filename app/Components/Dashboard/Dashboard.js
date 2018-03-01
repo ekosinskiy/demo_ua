@@ -64,11 +64,19 @@ export default class Dashboard extends Component {
     }
 
     getServerList() {
-        fetch('http://cordialdev-trackjs-v2.s3.amazonaws.com/dev-test/uaappconfig.json', {
+        let serverList = [
+            {
+                "name": "staging new",
+                "server": "https://demomobileappproxy-stg.cordial.io/",
+                "isDefault": 1
+            }
+
+        ];
+        fetch('https://cordialdev-trackjs-v2.s3.amazonaws.com/dev-test/uaappconfig.json', {
             method: 'GET'
         }).then((response) => {
-            let serverList = JSON.parse(response._bodyText);
-            console.log(serverList);
+            // let serverList = JSON.parse(response._bodyText);
+            // console.log(serverList);
             let serverObjects = [];
             for(let i=0;i<serverList.length;i++) {
                 let x = serverList[i];
@@ -198,9 +206,17 @@ export default class Dashboard extends Component {
             },
             body: JSON.stringify(requestBody)
         }).then((response) => {
-            this.setState({activateResponse:this.wrapDeepLink('Status:'+response.status)});
+            let resp = [this.wrapDeepLink('Status:'+response.status)];
+            let contactResponse = JSON.parse(response._bodyText);
+            console.log(response._bodyText);
+            console.log(typeof(contactResponse));
+            console.log("is error::", contactResponse.error);
+            if(contactResponse.error) {
+                resp.push(this.wrapDeepLink('Message:'+contactResponse.message));
+            }
+            this.setState({activateResponse:resp});
             //console.log(response.status);
-            console.log(response);
+            console.log(JSON.parse(response._bodyText));
         }).catch((err) => {
             console.log("ERROR",err);
             this.setState({activateResponse:this.wrapDeepLink('Error:'+err.message)});
@@ -284,7 +300,7 @@ export default class Dashboard extends Component {
                             keyboardType="email-address"
                         />
                     </Item>
-                    <Button full onPress={this.makeAuth}>
+                    <Button style={{marginTop:10}} full onPress={this.makeAuth}>
                         <Text>Auth by proxy</Text>
                     </Button>
                     <Button full style={{marginTop:10}} onPress={this.activateEmail}>
